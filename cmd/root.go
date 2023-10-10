@@ -7,8 +7,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
+
+var highlight = color.New(color.FgCyan).SprintFunc()
+
+func check(e error) {
+	if e != nil {
+		fmt.Println(e)
+		os.Exit(1)
+	}
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

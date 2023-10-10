@@ -8,19 +8,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fatih/color"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 )
-
-var highlight = color.New(color.FgCyan).SprintFunc()
-
-func check(e error) {
-	if e != nil {
-		fmt.Println(e)
-		os.Exit(1)
-	}
-}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -28,6 +18,18 @@ var initCmd = &cobra.Command{
 	Short: "Grug init config",
 	Long:  "Grug check and create config dir, file, and table. Trust grug!",
 	Run:   initGrugDb,
+}
+
+func dbExists(db *sql.DB) bool {
+	var exists bool
+	results, err := db.Query("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='grug_command');")
+	check(err)
+	results.Next()
+	err = results.Scan(&exists)
+	results.Close()
+	check(err)
+
+	return exists
 }
 
 func initGrugDb(cmd *cobra.Command, args []string) {
@@ -76,15 +78,15 @@ func initGrugDb(cmd *cobra.Command, args []string) {
 	check(err)
 	defer db.Close()
 
-	var exists bool
-	results, err := db.Query("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='grug_command');")
-	check(err)
-	results.Next()
-	err = results.Scan(&exists)
-	results.Close()
-	check(err)
+	// var exists bool
+	// results, err := db.Query("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='grug_command');")
+	// check(err)
+	// results.Next()
+	// err = results.Scan(&exists)
+	// results.Close()
+	// check(err)
 
-	if !exists {
+	if !dbExists(db) {
 		_, err := db.Exec("CREATE TABLE grug_command(name TEXT PRIMARY KEY, type TEXT, command TEXT);")
 		check(err)
 		fmt.Printf("Grug created `%s` table.\n", highlight("grug_command"))
