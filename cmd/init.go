@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 BaoCaiH
 */
 package cmd
 
@@ -20,23 +20,8 @@ var initCmd = &cobra.Command{
 	Run:   initGrugDb,
 }
 
-func dbExists(db *sql.DB) bool {
-	var exists bool
-	results, err := db.Query("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='grug_command');")
-	check(err)
-	results.Next()
-	err = results.Scan(&exists)
-	results.Close()
-	check(err)
-
-	return exists
-}
-
 func initGrugDb(cmd *cobra.Command, args []string) {
-	home := os.Getenv("HOME")
-	grugDir := home + "/.grugdo"
-	grugDb := grugDir + "/grugdo.db"
-
+	fmt.Println()
 	if _, err := os.Stat(grugDir); os.IsNotExist(err) {
 		fmt.Println("Grug tried to find config dir.")
 		fmt.Printf("Grug can't find `%s` at $HOME\n", highlight(".grugdo"))
@@ -78,14 +63,6 @@ func initGrugDb(cmd *cobra.Command, args []string) {
 	check(err)
 	defer db.Close()
 
-	// var exists bool
-	// results, err := db.Query("SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='grug_command');")
-	// check(err)
-	// results.Next()
-	// err = results.Scan(&exists)
-	// results.Close()
-	// check(err)
-
 	if !dbExists(db) {
 		_, err := db.Exec("CREATE TABLE grug_command(name TEXT PRIMARY KEY, type TEXT, command TEXT);")
 		check(err)
@@ -97,12 +74,4 @@ func initGrugDb(cmd *cobra.Command, args []string) {
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
